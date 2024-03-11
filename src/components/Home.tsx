@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import "./Home.css";
 import LoadingSpinner from "./LoadingSpinner";
 
-function Home() {
-  const [isLoading, setIsLoading] = useState(true);
+const Home: React.FC = () => {
+  const [isLoading, setIsLoading] = useState< boolean >(true);
 
   useEffect(() => {
     const timeout = setTimeout(() => {

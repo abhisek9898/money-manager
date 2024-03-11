@@ -1,7 +1,7 @@
-import React from "react";
+import React, {FC} from "react";
 import Navbar from "./components/Navbar";
 
-function App() {
+const App: FC = function () {
   return (
     <div>
       <Navbar />

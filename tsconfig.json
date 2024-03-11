@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "jsx": "react",
+    "jsxImportSource": "react",
+    "exclude": ["src/reportWebVitals.js"],
+    "target": "es2016",                                 
+    "esModuleInterop": true,                            
+    "forceConsistentCasingInFileNames": true,        
+    "strict": true,                                      
+    "skipLibCheck": true                                
+  }
+}

@@ -6,20 +6,31 @@ import Modal from "react-modal";
 import dateFormat from "dateformat";
 import LoadingSpinner from "./LoadingSpinner";
 
+Modal.setAppElement("#root");
+
+interface Expense {
+  $id: string;
+  Amount: number;
+  Date: string;
+  Details: string;
+}
+
 const client = new Client()
   .setEndpoint("https://cloud.appwrite.io/v1")
   .setProject("65e6a6f0780da76d3c7e");
 
 const database = new Databases(client);
 
-const ExpensesPage = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [expensesList, setExpensesList] = useState([]);
-  const [Amount, setAmount] = useState("");
-  const [Date, setDate] = useState("");
-  const [Details, setDetails] = useState("");
-  const [editingExpense, setEditingExpense] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+const ExpensesPage: React.FC = () => {
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [expensesList, setExpensesList] = useState<Expense[]>([]);
+  const [Amount, setAmount] = useState<string>("");
+  const [expenseDate, setExpenseDate] = useState<string>(
+    dateFormat(new Date(), "dd mmm yyyy")
+  );
+  const [Details, setDetails] = useState<string>("");
+  const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     loadExpenses();
@@ -42,10 +53,12 @@ const ExpensesPage = () => {
         "65e8989e96592ba6b344",
         [Query.equal("AppUserId", user.$id)]
       );
-      const formattedExpenses = response.documents.map((expense) => ({
-        ...expense,
-        Date: dateFormat(expense.Date, "dd mmm yyyy"),
-      }));
+      const formattedExpenses: Expense[] = response.documents.map(
+        (expense: any) => ({
+          ...expense,
+          Date: dateFormat(expense.Date, "dd mmm yyyy"),
+        })
+      );
 
       setExpensesList(formattedExpenses);
     } catch (error) {
@@ -53,7 +66,7 @@ const ExpensesPage = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     try {
@@ -85,7 +98,7 @@ const ExpensesPage = () => {
         );
       }
       setAmount("");
-      setDate("");
+      setExpenseDate(dateFormat(new Date(), "dd mmm yyyy"));
       setDetails("");
       loadExpenses();
       setIsModalOpen(false);
@@ -94,15 +107,25 @@ const ExpensesPage = () => {
     }
   };
 
-  const handleEditExpense = (expense) => {
-    setAmount(expense.Amount);
-    setDate(expense.Date);
+  const handleEditExpense = (expense: Expense) => {
+    setAmount(expense.Amount.toString());
+    setExpenseDate(formatDateForInput(expense.Date));
     setDetails(expense.Details);
     setEditingExpense(expense);
     setIsModalOpen(true);
   };
 
-  const handleDeleteExpense = async (expenseId) => {
+  const formatDateForInput = (dateString: string): string => {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    let month = (1 + date.getMonth()).toString();
+    month = month.length > 1 ? month : "0" + month;
+    let day = date.getDate().toString();
+    day = day.length > 1 ? day : "0" + day;
+    return year + "-" + month + "-" + day;
+  };
+
+  const handleDeleteExpense = async (expenseId: string) => {
     try {
       await database.deleteDocument(
         "65e898740ae397f893d4",
@@ -123,7 +146,7 @@ const ExpensesPage = () => {
   const handleCancel = () => {
     setEditingExpense(null);
     setAmount("");
-    setDate("");
+    setExpenseDate(dateFormat(new Date(), "dd mmm yyyy"));
     setDetails("");
     setIsModalOpen(false);
   };
@@ -233,8 +256,8 @@ const ExpensesPage = () => {
                       type="date"
                       id="date"
                       className="form-control"
-                      value={Date}
-                      onChange={(e) => setDate(e.target.value)}
+                      value={expenseDate}
+                      onChange={(e) => setExpenseDate(e.target.value)}
                     />
                   </div>
                   <div className="mb-3">

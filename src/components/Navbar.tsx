@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { FC,useState, useEffect } from "react";
 import LoadingSpinner from "./loader";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -10,10 +10,10 @@ const client = new Client()
 
 const account = new Account(client);
 
-const Navbar = () => {
+const Navbar: FC = () => {
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 
   useEffect(() => {
     const handleInitialCall = async () => {

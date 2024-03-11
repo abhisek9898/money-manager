@@ -3,21 +3,26 @@ import { Client, Account, ID } from "appwrite";
 import { useNavigate } from "react-router-dom";
 import LoadingSpinner from "./LoadingSpinner";
 
+interface LoginProps {
+  onLogout: () => void;
+  isLoggedIn: boolean;
+}
+
 const client = new Client()
   .setEndpoint("https://cloud.appwrite.io/v1")
   .setProject("65e6a6f0780da76d3c7e");
 
 const account = new Account(client);
 
-function Login({ onLogout, isLoggedIn }) {
-  const [isLogin, setIsLogin] = useState(true);
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState(null);
+const Login: React.FC<LoginProps> = ({ onLogout, isLoggedIn }) => {
+  const [isLogin, setIsLogin] = useState<boolean>(true);
+  const [username, setUsername] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [error, setError] = useState< string | null >(null);
 
   const navigation = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent< HTMLFormElement> ) => {
     e.preventDefault();
     try {
       if (isLogin) {
@@ -27,13 +32,13 @@ function Login({ onLogout, isLoggedIn }) {
       }
 
       navigation("/expensepage");
-    } catch (error) {
-      console.log(error["message"]);
+    } catch (error: any) {
+      console.log(error.message || "Unknown error occurred");
       setError("Invalid username or password");
     }
   };
 
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState< boolean >(true);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
