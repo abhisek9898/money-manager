@@ -2,7 +2,7 @@ import React from "react";
 
 const LoadingSpinner: React.FC = () => {
   return (
-    <div>
+    <div className="spinner-border" role="status">
       <span className="visually-hidden">Loading</span>
     </div>
   );

@@ -18,11 +18,12 @@ const Login: React.FC<LoginProps> = ({ onLogout, isLoggedIn }) => {
   const [isLogin, setIsLogin] = useState<boolean>(true);
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [error, setError] = useState< string | null >(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const navigation = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent< HTMLFormElement> ) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       if (isLogin) {
@@ -35,10 +36,12 @@ const Login: React.FC<LoginProps> = ({ onLogout, isLoggedIn }) => {
     } catch (error: any) {
       console.log(error.message || "Unknown error occurred");
       setError("Invalid username or password");
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const [isLoading, setIsLoading] = useState< boolean >(true);
+  // const [isLoading, setIsLoading] = useState< boolean >(true);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -90,6 +93,13 @@ const Login: React.FC<LoginProps> = ({ onLogout, isLoggedIn }) => {
                       <button type="submit" className="btn btn-primary w-100">
                         {isLogin ? "Login" : "Register"}
                       </button>
+                      {isLoading && (
+                        <div className="text-center mt-2">
+                          <div className="spinner-border" role="status">
+                            <span className="visually-hidden">Loading...</span>
+                          </div>
+                        </div>
+                      )}
                       {error && <div className="text-danger mt-3">{error}</div>}
                     </form>
                     <div className="text-center mt-3">
@@ -113,5 +123,5 @@ const Login: React.FC<LoginProps> = ({ onLogout, isLoggedIn }) => {
       )}
     </div>
   );
-}
+};
 export default Login;

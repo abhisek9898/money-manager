@@ -11,7 +11,7 @@ Modal.setAppElement("#root");
 interface Expense {
   $id: string;
   Amount: number;
-  Date: string;
+  date: string;
   Details: string;
 }
 
@@ -25,8 +25,8 @@ const ExpensesPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [expensesList, setExpensesList] = useState<Expense[]>([]);
   const [Amount, setAmount] = useState<string>("");
-  const [expenseDate, setExpenseDate] = useState<string>(
-    dateFormat(new Date(), "dd mmm yyyy")
+  const [date, setdate] = useState<string>(
+    dateFormat(new Date(), "yyyy-mm-dd")
   );
   const [Details, setDetails] = useState<string>("");
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
@@ -56,7 +56,7 @@ const ExpensesPage: React.FC = () => {
       const formattedExpenses: Expense[] = response.documents.map(
         (expense: any) => ({
           ...expense,
-          Date: dateFormat(expense.Date, "dd mmm yyyy"),
+          date: dateFormat(expense.date, "yyyy-mm-dd"),
         })
       );
 
@@ -78,7 +78,7 @@ const ExpensesPage: React.FC = () => {
           editingExpense.$id,
           {
             Amount,
-            Date,
+            date,
             Details,
             AppUserId: user.$id,
           }
@@ -91,14 +91,14 @@ const ExpensesPage: React.FC = () => {
           ID.unique(),
           {
             Amount,
-            Date,
+            date,
             Details,
             AppUserId: user.$id,
           }
         );
       }
       setAmount("");
-      setExpenseDate(dateFormat(new Date(), "dd mmm yyyy"));
+      setdate(dateFormat(new Date(), "yyyy-mm-dd"));
       setDetails("");
       loadExpenses();
       setIsModalOpen(false);
@@ -109,7 +109,7 @@ const ExpensesPage: React.FC = () => {
 
   const handleEditExpense = (expense: Expense) => {
     setAmount(expense.Amount.toString());
-    setExpenseDate(formatDateForInput(expense.Date));
+    setdate(formatDateForInput(expense.date));
     setDetails(expense.Details);
     setEditingExpense(expense);
     setIsModalOpen(true);
@@ -140,13 +140,14 @@ const ExpensesPage: React.FC = () => {
 
   const handleAddExpenseClick = () => {
     setEditingExpense(null);
+
     setIsModalOpen(true);
   };
 
   const handleCancel = () => {
     setEditingExpense(null);
     setAmount("");
-    setExpenseDate(dateFormat(new Date(), "dd mmm yyyy"));
+    setdate(dateFormat(new Date(), "yyyy-mm-dd"));
     setDetails("");
     setIsModalOpen(false);
   };
@@ -183,7 +184,7 @@ const ExpensesPage: React.FC = () => {
                           {expensesList.map((expense, index) => (
                             <tr key={index}>
                               <td>{expense.Amount}</td>
-                              <td>{expense.Date}</td>
+                              <td>{expense.date}</td>
                               <td>{expense.Details}</td>
                               <td>
                                 <button
@@ -256,8 +257,8 @@ const ExpensesPage: React.FC = () => {
                       type="date"
                       id="date"
                       className="form-control"
-                      value={expenseDate}
-                      onChange={(e) => setExpenseDate(e.target.value)}
+                      value={date}
+                      onChange={(e) => setdate(e.target.value)}
                     />
                   </div>
                   <div className="mb-3">
