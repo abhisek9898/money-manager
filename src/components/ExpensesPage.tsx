@@ -26,7 +26,7 @@ const ExpensesPage: React.FC = () => {
   const [expensesList, setExpensesList] = useState<Expense[]>([]);
   const [Amount, setAmount] = useState<string>("");
   const [date, setdate] = useState<string>(
-    dateFormat(new Date(), "yyyy-mm-dd")
+    dateFormat(new Date(), "dd mm yyyy")
   );
   const [Details, setDetails] = useState<string>("");
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
@@ -56,7 +56,7 @@ const ExpensesPage: React.FC = () => {
       const formattedExpenses: Expense[] = response.documents.map(
         (expense: any) => ({
           ...expense,
-          date: dateFormat(expense.date, "yyyy-mm-dd"),
+          date: dateFormat(expense.date, "dd mm yyyy"),
         })
       );
 
@@ -98,7 +98,7 @@ const ExpensesPage: React.FC = () => {
         );
       }
       setAmount("");
-      setdate(dateFormat(new Date(), "yyyy-mm-dd"));
+      setdate(dateFormat(new Date(), "dd mm yyyy"));
       setDetails("");
       loadExpenses();
       setIsModalOpen(false);
@@ -147,7 +147,7 @@ const ExpensesPage: React.FC = () => {
   const handleCancel = () => {
     setEditingExpense(null);
     setAmount("");
-    setdate(dateFormat(new Date(), "yyyy-mm-dd"));
+    setdate(dateFormat(new Date(), "dd mm yyyy"));
     setDetails("");
     setIsModalOpen(false);
   };
