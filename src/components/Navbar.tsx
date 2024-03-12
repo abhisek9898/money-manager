@@ -1,5 +1,5 @@
-import React, { FC,useState, useEffect } from "react";
-import LoadingSpinner from "./loader";
+import React, { FC, useState, useEffect } from "react";
+import LoadingSpinner from "./LoadingSpinner";
 import { Link, useNavigate } from "react-router-dom";
 
 import { Client, Account } from "appwrite";

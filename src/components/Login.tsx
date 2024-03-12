@@ -26,6 +26,7 @@ const Login: React.FC<LoginProps> = ({ onLogout, isLoggedIn }) => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
+      setIsLoading(true);
       if (isLogin) {
         await account.createEmailSession(username, password);
       } else {
@@ -90,16 +91,18 @@ const Login: React.FC<LoginProps> = ({ onLogout, isLoggedIn }) => {
                           onChange={(e) => setPassword(e.target.value)}
                         />
                       </div>
-                      <button type="submit" className="btn btn-primary w-100">
+                      <button
+                        type="submit"
+                        className="btn btn-primary w-100"
+                        position-relative
+                      >
                         {isLogin ? "Login" : "Register"}
-                      </button>
-                      {isLoading && (
-                        <div className="text-center mt-2">
+                        {isLoading && (
                           <div className="spinner-border" role="status">
                             <span className="visually-hidden">Loading...</span>
                           </div>
-                        </div>
-                      )}
+                        )}
+                      </button>
                       {error && <div className="text-danger mt-3">{error}</div>}
                     </form>
                     <div className="text-center mt-3">
