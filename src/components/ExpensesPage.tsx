@@ -31,6 +31,9 @@ const ExpensesPage: React.FC = () => {
   const [Details, setDetails] = useState<string>("");
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isAdding, setIsAdding] = useState<boolean>(false);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
   useEffect(() => {
     loadExpenses();
@@ -70,8 +73,10 @@ const ExpensesPage: React.FC = () => {
     e.preventDefault();
 
     try {
+      setIsAdding(true);
       const user = await new Account(client).get();
       if (editingExpense) {
+        setIsEditing(true);
         await database.updateDocument(
           "65e898740ae397f893d4",
           "65e8989e96592ba6b344",
@@ -104,6 +109,9 @@ const ExpensesPage: React.FC = () => {
       setIsModalOpen(false);
     } catch (error) {
       console.error("Error adding expense:", error);
+    } finally {
+      setIsAdding(false);
+      setIsEditing(false);
     }
   };
 
@@ -195,17 +203,31 @@ const ExpensesPage: React.FC = () => {
                                 </button>
                                 <button
                                   className="btn btn-link"
-                                  onClick={() => {
+                                  onClick={async () => {
                                     if (
                                       window.confirm(
                                         "Are you sure you want to delete this expense?"
                                       )
                                     ) {
-                                      handleDeleteExpense(expense.$id);
+                                      setIsDeleting(true);
+                                      try {
+                                        await handleDeleteExpense(expense.$id);
+                                      } catch (error) {
+                                        console.error(
+                                          "Error deleting expense:",
+                                          error
+                                        );
+                                      } finally {
+                                        setIsDeleting(false);
+                                      }
                                     }
                                   }}
                                 >
-                                  <FontAwesomeIcon icon={faTrash} />
+                                  {isDeleting ? (
+                                    <LoadingSpinner />
+                                  ) : (
+                                    <FontAwesomeIcon icon={faTrash} />
+                                  )}
                                 </button>
                               </td>
                             </tr>
@@ -236,56 +258,66 @@ const ExpensesPage: React.FC = () => {
                 <h2 className="text-center mb-8">
                   {editingExpense ? "Edit" : "Add"}
                 </h2>
-                <form onSubmit={handleSubmit}>
-                  <div className="mb-3">
-                    <label htmlFor="amount" className="form-label">
-                      Amount:
-                    </label>
-                    <input
-                      type="number"
-                      id="amount"
-                      className="form-control"
-                      value={Amount}
-                      onChange={(e) => setAmount(e.target.value)}
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="date" className="form-label">
-                      Date:
-                    </label>
-                    <input
-                      type="date"
-                      id="date"
-                      className="form-control"
-                      value={date}
-                      onChange={(e) => setdate(e.target.value)}
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="details" className="form-label">
-                      Details:
-                    </label>
-                    <input
-                      type="text"
-                      id="details"
-                      className="form-control"
-                      value={Details}
-                      onChange={(e) => setDetails(e.target.value)}
-                    />
-                  </div>
-                  <div className="d-grid gap-2">
-                    <button type="submit" className="btn btn-primary">
-                      {editingExpense ? "Update" : "Add"}
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-secondary"
-                      onClick={handleCancel}
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </form>
+                {isAdding || isEditing ? (
+                  <LoadingSpinner />
+                ) : (
+                  <form onSubmit={handleSubmit}>
+                    <div className="mb-3">
+                      <label htmlFor="amount" className="form-label">
+                        Amount:
+                      </label>
+                      <input
+                        type="number"
+                        id="amount"
+                        className="form-control"
+                        value={Amount}
+                        onChange={(e) => setAmount(e.target.value)}
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <label htmlFor="date" className="form-label">
+                        Date:
+                      </label>
+                      <input
+                        type="date"
+                        id="date"
+                        className="form-control"
+                        value={date}
+                        onChange={(e) => setdate(e.target.value)}
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <label htmlFor="details" className="form-label">
+                        Details:
+                      </label>
+                      <input
+                        type="text"
+                        id="details"
+                        className="form-control"
+                        value={Details}
+                        onChange={(e) => setDetails(e.target.value)}
+                      />
+                    </div>
+                    <div className="d-grid gap-2">
+                      <button
+                        type="submit"
+                        className={`btn btn-primary w-100 position-relative ${
+                          isAdding || isEditing ? "disabled" : ""
+                        }`}
+                        disabled={isAdding || isEditing}
+                      >
+                        {editingExpense ? "Update" : "Add"}
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-secondary"
+                        onClick={handleCancel}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                )}
               </div>
             </Modal>
           </div>
