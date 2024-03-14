@@ -1,18 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Client, Account, ID } from "appwrite";
 import { useNavigate } from "react-router-dom";
 import LoadingSpinner from "./LoadingSpinner";
+import { UserLogin, UserRegister } from "../Servises/aurh.service";
 
 interface LoginProps {
   onLogout: () => void;
   isLoggedIn: boolean;
 }
-
-const client = new Client()
-  .setEndpoint("https://cloud.appwrite.io/v1")
-  .setProject("65e6a6f0780da76d3c7e");
-
-const account = new Account(client);
 
 const Login: React.FC<LoginProps> = ({ onLogout, isLoggedIn }) => {
   const [isLogin, setIsLogin] = useState<boolean>(true);
@@ -28,9 +22,9 @@ const Login: React.FC<LoginProps> = ({ onLogout, isLoggedIn }) => {
     try {
       setIsLoading(true);
       if (isLogin) {
-        await account.createEmailSession(username, password);
+        await UserLogin(username, password);
       } else {
-        await account.create(ID.unique(), username, password);
+        await UserRegister(username, password);
       }
 
       navigation("/expensepage");

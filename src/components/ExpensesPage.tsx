@@ -5,6 +5,7 @@ import { faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
 import Modal from "react-modal";
 import dateFormat from "dateformat";
 import LoadingSpinner from "./LoadingSpinner";
+import { GetListData } from "../Servises/data.service";
 
 Modal.setAppElement("#root");
 
@@ -51,11 +52,16 @@ const ExpensesPage: React.FC = () => {
     try {
       const account = new Account(client);
       const user = await account.get();
-      const response = await database.listDocuments(
+      const response = await GetListData(
         "65e898740ae397f893d4",
         "65e8989e96592ba6b344",
         [Query.equal("AppUserId", user.$id)]
       );
+      // const response = await database.listDocuments(
+      //   "65e898740ae397f893d4",
+      //   "65e8989e96592ba6b344",
+      //   [Query.equal("AppUserId", user.$id)]
+      // );
       const formattedExpenses: Expense[] = response.documents.map(
         (expense: any) => ({
           ...expense,

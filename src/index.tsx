@@ -12,26 +12,28 @@ const handleLogout = () => {
   console.log("Logged out");
 };
 
-const isLoggedIn = false; 
+const isLoggedIn = false;
 
-const root = ReactDOM.createRoot(document.getElementById("root") || document.createElement("div"));
+const root = ReactDOM.createRoot(
+  document.getElementById("root") || document.createElement("div")
+);
 root.render(
   <Router>
     <App />
     <Routes>
-      <Route path="/login" 
-      element={<Login onLogout={handleLogout} isLoggedIn={isLoggedIn} />} />
+      <Route
+        path="/login"
+        element={<Login onLogout={handleLogout} isLoggedIn={isLoggedIn} />}
+      />
       <Route path="/expensepage" element={<ExpensesPage />} />
       <Route path="/" element={<Home />} />
     </Routes>
   </Router>
-);  
-reportWebVitals ((onPreEntery)=>{
-    console.log(onPreEntery);
-    
+);
+reportWebVitals((onPreEntery: any) => {
+  console.log(onPreEntery);
 });
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-

@@ -1,4 +1,4 @@
-import React, {FC} from "react";
+import React, { FC } from "react";
 import Navbar from "./components/Navbar";
 
 const App: FC = function () {
@@ -7,6 +7,6 @@ const App: FC = function () {
       <Navbar />
     </div>
   );
-}
+};
 
 export default App;
