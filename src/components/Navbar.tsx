@@ -57,41 +57,58 @@ const Navbar: FC = () => {
           style={{ backgroundColor: "rgba(0, 0, 0, 0.6)" }}
         >
           <div className="container-fluid">
-            <Link
-              to="/"
-              className="navbar-brand"
-              style={{
-                color: "pink",
-                fontWeight: "bold",
-              }}
-            >
+            <Link to="/" className="navbar-brand">
               Home
             </Link>
-            <div className="d-flex justify-content-end align-items-center">
-              <ul className="navbar-nav">
-                <li className="nav-item">
-                  {isLoggedIn ? (
-                    <div className="d-flex align-items-center">
-                      <button
+            <button
+              className="navbar-toggler"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#navbarNav"
+              aria-controls="navbarNav"
+              aria-expanded="false"
+              aria-label="Toggle navigation"
+            >
+              <span className="navbar-toggler-icon"></span>
+            </button>
+            <div className="collapse navbar-collapse" id="navbarNav">
+              <div className="d-flex justify-content-end align-items-center">
+                <ul className="navbar-nav">
+                  <li className="nav-item">
+                    {isLoggedIn ? (
+                      <div className="d-flex align-items-center">
+                        <button
+                          className="btn btn-outline-danger"
+                          style={{
+                            color: "pink",
+                            fontWeight: "bold",
+                            marginLeft: "20px",
+                            fontSize: "10px",
+                            marginTop: "5px",
+                          }}
+                          onClick={handleLogout}
+                        >
+                          Logout
+                        </button>
+                      </div>
+                    ) : (
+                      <Link
+                        to="/login"
                         className="btn btn-outline-danger"
-                        style={{ color: "pink" }}
-                        onClick={handleLogout}
+                        style={{
+                          color: "pink",
+                          fontWeight: "bold",
+                          marginLeft: "20px",
+                          fontSize: "12px",
+                          marginTop: "5px",
+                        }}
                       >
-                        Logout
-                      </button>
-                    </div>
-                  ) : (
-                    <Link
-                      to="/login"
-                      className="btn btn-outline-danger"
-                      style={{ color: "pink" }}
-                      //className="btn btn-danger"
-                    >
-                      Login
-                    </Link>
-                  )}
-                </li>
-              </ul>
+                        Login
+                      </Link>
+                    )}
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
         </nav>

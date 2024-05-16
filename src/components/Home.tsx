@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
-import "./Home.css";
 import LoadingSpinner from "./LoadingSpinner";
 
 const Home: React.FC = () => {
-  const [isLoading, setIsLoading] = useState< boolean >(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -14,18 +13,30 @@ const Home: React.FC = () => {
   }, []);
 
   return (
-    <div>
-      {isLoading ? (
-        <LoadingSpinner />
-      ) : (
-        <div>
-          <div className="col-md-12 text-center">
-            <h1 className="money-manager-heading mt-5">MONEY MANAGER</h1>
-          </div>
+    <div className="container">
+      <div className="row">
+        <div className="col">
+          {isLoading ? (
+            <LoadingSpinner />
+          ) : (
+            <div>
+              <h1
+                className="money text-center"
+                style={{
+                  marginTop: "100px",
+                  fontSize: "40px",
+                  fontWeight: "bolder",
+                  fontFamily: "monospace",
+                }}
+              >
+                MONEY MANAGER
+              </h1>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
-}
+};
 
 export default Home;

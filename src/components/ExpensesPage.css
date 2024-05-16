@@ -1,6 +1,0 @@
-/* .blur-background {
-  filter: blur(3px);
-} */
-.modal-open .container {
-  filter: blur(3px);
-}
