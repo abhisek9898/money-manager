@@ -2,12 +2,10 @@ import React, { useState, useEffect } from "react";
 import { Client, Account, Databases, Query, ID } from "appwrite";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
-import Modal from "react-modal";
 import dateFormat from "dateformat";
 import LoadingSpinner from "./LoadingSpinner";
 import { GetListData } from "../Servises/data.service";
-
-Modal.setAppElement("#root");
+import Modal from "./Modal";
 
 interface Expense {
   $id: string;
@@ -22,7 +20,6 @@ const client = new Client()
 
 const database = new Databases(client);
 
-// Define loadExpenses function with setExpensesList parameter
 const loadExpenses = async (
   setExpensesList: React.Dispatch<React.SetStateAction<Expense[]>>,
   date: Date
@@ -45,7 +42,6 @@ const loadExpenses = async (
       })
     );
 
-    // Use the passed setExpensesList function to update state
     setExpensesList(formattedExpenses);
   } catch (error) {
     console.error("Error loading expenses:", error);
@@ -92,6 +88,7 @@ const ExpensesPage: React.FC = () => {
     try {
       setIsAdding(true);
       const user = await new Account(client).get();
+      const amountFloat = parseFloat(Amount);
       if (editingExpense) {
         setIsEditing(true);
         await database.updateDocument(
@@ -99,7 +96,7 @@ const ExpensesPage: React.FC = () => {
           "65e8989e96592ba6b344",
           editingExpense.$id,
           {
-            Amount,
+            Amount: amountFloat,
             date: new Date(date).toISOString(),
             Details,
             AppUserId: user.$id,
@@ -112,7 +109,7 @@ const ExpensesPage: React.FC = () => {
           "65e8989e96592ba6b344",
           ID.unique(),
           {
-            Amount,
+            Amount: amountFloat,
             date: new Date(date).toISOString(),
             Details,
             AppUserId: user.$id,
@@ -134,6 +131,7 @@ const ExpensesPage: React.FC = () => {
 
   const handleEditExpense = (expense: Expense) => {
     setAmount(expense.Amount.toString());
+    setdate(expense.date);
     setDetails(expense.Details);
     setEditingExpense(expense);
     setIsModalOpen(true);
@@ -154,7 +152,6 @@ const ExpensesPage: React.FC = () => {
 
   const handleAddExpenseClick = () => {
     setEditingExpense(null);
-
     setIsModalOpen(true);
   };
 
@@ -167,221 +164,183 @@ const ExpensesPage: React.FC = () => {
   };
 
   return (
-    <div className="container-fluid">
-      <div className="row">
-        <div className="col">
-          <div className="text-center mt-3">
-            {/* Add date picker */}
-            <div
-              className="mb-3"
-              style={{ width: "fit-content", margin: "0 auto" }}
-            >
-              <label htmlFor="filter-date" className="form-label">
-                Filter by Date
-              </label>
-              <input
-                type="date"
-                id="filter-date"
-                className="form-control"
-                value={date}
-                onChange={(e) => setdate(e.target.value)}
-                style={{ width: "150px" }}
-              />
-            </div>
-          </div>
+    <div className="container mx-auto p-4">
+      <div className="text-center mt-3">
+        <div className="mb-3">
+          <label
+            htmlFor="filter-date"
+            className="block mb-2 text-sm font-medium text-gray-700"
+          >
+            Filter by Date
+          </label>
+          <input
+            type="date"
+            id="filter-date"
+            className="block w-48 mx-auto border border-gray-300 rounded p-2"
+            value={date}
+            onChange={(e) => setdate(e.target.value)}
+          />
         </div>
       </div>
 
-      <div className="row">
-        <div className="col">
-          {isLoading ? (
-            <LoadingSpinner />
-          ) : (
-            <div>
-              <div className="container position-relative">
-                <div className="row justify-content-center mt-5">
-                  <div className="col-md-8">
-                    <div
-                      className="card mb-4"
-                      style={{ background: "#f8f9fa" }}
-                    >
-                      <div className="card-body">
-                        <button
-                          className="btn btn-primary position-absolute top-0 end-0 mt-3 me-3"
-                          onClick={handleAddExpenseClick}
-                          style={{
-                            fontWeight: 500,
-                            fontSize: "11px",
-                            color: "black",
-                          }}
-                        >
-                          Add Expense
-                        </button>
-                        <h2
-                          className="text-center mb-4"
-                          style={{
-                            fontWeight: 500,
-                            fontSize: "25px",
-                            marginRight: "40px",
-                          }}
-                        >
-                          View Expenses
-                        </h2>
-                        <table className="table table-bordered table-striped">
-                          <thead>
-                            <tr>
-                              <th>Amount</th>
-                              <th>Date</th>
-                              <th>Details</th>
-                              <th>Edit - Delete</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {expensesList.map((expense, index) => (
-                              <tr key={index}>
-                                <td>{expense.Amount}</td>
-                                <td>{expense.date}</td>
-                                <td>{expense.Details}</td>
-                                <td>
-                                  <button
-                                    className="btn btn-link"
-                                    onClick={() => handleEditExpense(expense)}
-                                  >
-                                    <FontAwesomeIcon icon={faEdit} />
-                                  </button>
-                                  <button
-                                    className="btn btn-link"
-                                    onClick={async () => {
-                                      if (
-                                        window.confirm(
-                                          "Are you sure you want to delete this expense?"
-                                        )
-                                      ) {
-                                        setIsDeleting(true);
-                                        try {
-                                          await handleDeleteExpense(
-                                            expense.$id
-                                          );
-                                        } catch (error) {
-                                          console.error(
-                                            "Error deleting expense:",
-                                            error
-                                          );
-                                        } finally {
-                                          setIsDeleting(false);
-                                        }
-                                      }
-                                    }}
-                                  >
-                                    {isDeleting ? (
-                                      <LoadingSpinner />
-                                    ) : (
-                                      <FontAwesomeIcon icon={faTrash} />
-                                    )}
-                                  </button>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+      <div>
+        {isLoading ? (
+          <LoadingSpinner />
+        ) : (
+          <div className="relative">
+            <div className="max-w-3xl mx-auto mt-5">
+              <div className="bg-white shadow-md rounded p-4">
+                <button
+                  className="absolute top-0 right-15 mt-3 mr-3 bg-blue-500 text-white font-bold py-1 px-2 rounded"
+                  onClick={handleAddExpenseClick}
+                >
+                  Add
+                </button>
+                <h2 className="text-center mb-4 text-2xl font-semibold">
+                  View Expenses
+                </h2>
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr>
+                      <th className="border p-2">Amount</th>
+                      <th className="border p-2">Date</th>
+                      <th className="border p-2">Details</th>
+                      <th className="border p-2"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {expensesList.map((expense, index) => (
+                      <tr key={index}>
+                        <td className="border p-2">{expense.Amount}</td>
+                        <td className="border p-2">{expense.date}</td>
+                        <td className="border p-2">{expense.Details}</td>
+                        <td className="border p-2">
+                          <button
+                            className="text-blue-500 mr-2"
+                            onClick={() => handleEditExpense(expense)}
+                          >
+                            <FontAwesomeIcon icon={faEdit} />
+                          </button>
+                          <button
+                            className="text-red-500"
+                            onClick={async () => {
+                              if (
+                                window.confirm(
+                                  "Are you sure you want to delete this expense?"
+                                )
+                              ) {
+                                setIsDeleting(true);
+                                try {
+                                  await handleDeleteExpense(expense.$id);
+                                } catch (error) {
+                                  console.error(
+                                    "Error deleting expense:",
+                                    error
+                                  );
+                                } finally {
+                                  setIsDeleting(false);
+                                }
+                              }
+                            }}
+                          >
+                            {isDeleting ? (
+                              <LoadingSpinner />
+                            ) : (
+                              <FontAwesomeIcon icon={faTrash} />
+                            )}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-              <Modal
-                isOpen={isModalOpen}
-                onRequestClose={handleCancel}
-                style={{
-                  overlay: {
-                    backgroundColor: "rgba(0, 0, 0, 0.5)",
-                  },
-                  content: {
-                    width: "90%",
-                    maxWidth: "400px",
-                    inset: "unset",
-                    marginLeft: "20px",
-                    marginTop: "10vh",
-                  },
-                }}
-              >
-                <div className="card-body">
-                  <h2 className="text-center mb-8">
-                    {editingExpense ? "Edit" : "Add"}
-                  </h2>
-                  {isAdding || isEditing ? (
-                    <LoadingSpinner />
-                  ) : (
-                    <form onSubmit={handleSubmit}>
-                      <div className="mb-3">
-                        <label htmlFor="amount" className="form-label">
-                          Amount:
-                        </label>
-                        <input
-                          type="number"
-                          id="amount"
-                          className="form-control"
-                          value={Amount}
-                          onChange={(e) => setAmount(e.target.value)}
-                        />
-                      </div>
-                      <div className="mb-3">
-                        <label htmlFor="date" className="form-label">
-                          Date:
-                        </label>
-                        <input
-                          type="date"
-                          id="date"
-                          className="form-control"
-                          value={date}
-                          onChange={(e) => setdate(e.target.value)}
-                        />
-                      </div>
-                      <div className="mb-3">
-                        <label htmlFor="details" className="form-label">
-                          Details:
-                        </label>
-                        <input
-                          type="text"
-                          id="details"
-                          className="form-control"
-                          value={Details}
-                          onChange={(e) => setDetails(e.target.value)}
-                        />
-                      </div>
-                      <div className="d-grid gap-2">
-                        <button
-                          type="submit"
-                          className={`btn btn-primary w-100 position-relative ${
-                            isAdding || isEditing ? "disabled" : ""
-                          }`}
-                          disabled={isAdding || isEditing}
-                        >
-                          {editingExpense ? "Update" : "Add"}
-                        </button>
-                        <button
-                          type="button"
-                          className="btn btn-secondary"
-                          onClick={handleCancel}
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </form>
-                  )}
-                </div>
-              </Modal>
             </div>
-          )}
-        </div>
+            <Modal isOpen={isModalOpen} onClose={handleCancel}>
+              <div className="p-4">
+                <h2 className="text-center mb-4 text-xl font-semibold">
+                  {editingExpense ? "Edit" : "Add"} Expense
+                </h2>
+                {isAdding || isEditing ? (
+                  <LoadingSpinner />
+                ) : (
+                  <form onSubmit={handleSubmit}>
+                    <div className="mb-4">
+                      <label
+                        htmlFor="amount"
+                        className="block text-sm font-medium text-gray-700"
+                      >
+                        Amount:
+                      </label>
+                      <input
+                        type="number"
+                        id="amount"
+                        className="block w-full border border-gray-300 rounded p-2"
+                        value={Amount}
+                        onChange={(e) => setAmount(e.target.value)}
+                      />
+                    </div>
+                    <div className="mb-4">
+                      <label
+                        htmlFor="date"
+                        className="block text-sm font-medium text-gray-700"
+                      >
+                        Date:
+                      </label>
+                      <input
+                        type="date"
+                        id="date"
+                        className="block w-full border border-gray-300 rounded p-2"
+                        value={date}
+                        onChange={(e) => setdate(e.target.value)}
+                      />
+                    </div>
+                    <div className="mb-4">
+                      <label
+                        htmlFor="details"
+                        className="block text-sm font-medium text-gray-700"
+                      >
+                        Details:
+                      </label>
+                      <input
+                        type="text"
+                        id="details"
+                        className="block w-full border border-gray-300 rounded p-2"
+                        value={Details}
+                        onChange={(e) => setDetails(e.target.value)}
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        type="submit"
+                        className={`w-full bg-blue-500 text-white font-bold py-2 px-4 rounded ${
+                          isAdding || isEditing
+                            ? "opacity-50 cursor-not-allowed"
+                            : ""
+                        }`}
+                        disabled={isAdding || isEditing}
+                      >
+                        {editingExpense ? "Update" : "Add"}
+                      </button>
+                      <button
+                        type="button"
+                        className="w-full bg-gray-500 text-white font-bold py-2 px-4 rounded"
+                        onClick={handleCancel}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </div>
+            </Modal>
+          </div>
+        )}
       </div>
 
-      {/* Summary Section */}
-      <div className="row mt-3">
-        <div className="col text-center">
-          <h4>Total Amount for {date}</h4>
-          <p>{totalAmount}</p>
-        </div>
+      <div className="text-center mt-8">
+        <h4 className="text-xl font-semibold">Total Expenses for {date}</h4>
+        <p className="text-2xl font-bold">{totalAmount}</p>
       </div>
     </div>
   );

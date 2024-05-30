@@ -2,13 +2,8 @@ import React from "react";
 
 const LoadingSpinner: React.FC = () => {
   return (
-    <div
-      className="d-flex justify-content-center align-items-center"
-      style={{ height: "100vh" }}
-    >
-      <div className="spinner-border" role="status">
-        <span className="visually-hidden">Loading</span>
-      </div>
+    <div className="flex justify-center items-center mt-16">
+      <div className="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12"></div>
     </div>
   );
 };
