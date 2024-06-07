@@ -6,6 +6,7 @@ import dateFormat from "dateformat";
 import LoadingSpinner from "./LoadingSpinner";
 import { GetListData } from "../Servises/data.service";
 import Modal from "./Modal";
+import Navbar from "./Navbar";
 
 interface Expense {
   $id: string;
@@ -32,7 +33,7 @@ const loadExpenses = async (
       "65e8989e96592ba6b344",
       [
         Query.equal("AppUserId", user.$id),
-        Query.equal("date", new Date(date).toISOString().substring(0, 10)),
+        Query.equal("date", date.toISOString().substring(0, 10)),
       ]
     );
     const formattedExpenses: Expense[] = response.documents.map(
@@ -52,8 +53,8 @@ const ExpensesPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [expensesList, setExpensesList] = useState<Expense[]>([]);
   const [Amount, setAmount] = useState<string>("");
-  const [date, setdate] = useState<string>(
-    dateFormat(new Date(), "dd mm yyyy")
+  const [date, setDate] = useState<string>(
+    dateFormat(new Date(), "yyyy-mm-dd")
   );
   const [Details, setDetails] = useState<string>("");
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
@@ -117,7 +118,7 @@ const ExpensesPage: React.FC = () => {
         );
       }
       setAmount("");
-      setdate(dateFormat(new Date(), "dd mm yyyy"));
+      setDate(dateFormat(new Date(), "yyyy-mm-dd"));
       setDetails("");
       loadExpenses(setExpensesList, new Date(date));
       setIsModalOpen(false);
@@ -131,7 +132,7 @@ const ExpensesPage: React.FC = () => {
 
   const handleEditExpense = (expense: Expense) => {
     setAmount(expense.Amount.toString());
-    setdate(expense.date);
+    setDate(dateFormat(new Date(expense.date), "yyyy-mm-dd"));
     setDetails(expense.Details);
     setEditingExpense(expense);
     setIsModalOpen(true);
@@ -158,191 +159,196 @@ const ExpensesPage: React.FC = () => {
   const handleCancel = () => {
     setEditingExpense(null);
     setAmount("");
-    setdate(dateFormat(new Date(), "dd mm yyyy"));
+    setDate(dateFormat(new Date(), "yyyy-mm-dd"));
     setDetails("");
     setIsModalOpen(false);
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="text-center mt-3">
-        <div className="mb-3">
-          <label
-            htmlFor="filter-date"
-            className="block mb-2 text-sm font-medium text-gray-700"
-          >
-            Filter by Date
-          </label>
-          <input
-            type="date"
-            id="filter-date"
-            className="block w-48 mx-auto border border-gray-300 rounded p-2"
-            value={date}
-            onChange={(e) => setdate(e.target.value)}
-          />
+    <>
+      <Navbar />
+      <div className="h-[93vh] p-4 bg-gradient-to-r from-green-400 to-blue-500">
+        <div className="text-center mt-3">
+          <div className="mb-3">
+            <label
+              htmlFor="filter-date"
+              className="block mb-1 text-lg font-medium text-gray-700"
+            >
+              Filter by Date
+            </label>
+            <input
+              type="date"
+              id="filter-date"
+              className="block w-40 mx-auto border border-gray-300 rounded p-2"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div>
+          {isLoading ? (
+            <LoadingSpinner />
+          ) : (
+            <div className="relative">
+              <div className="max-w-3xl mx-auto mt-4">
+                <div className="bg-white shadow-md rounded p-4">
+                  <button
+                    className="absolute top-0 right-15 mt-3 mr-3 bg-blue-500 text-white font-bold py-1 px-2 rounded"
+                    onClick={handleAddExpenseClick}
+                  >
+                    Add
+                  </button>
+                  <h2 className="text-center mb-4 text-2xl font-semibold">
+                    View Expenses
+                  </h2>
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr>
+                        <th className="border p-2">Amount</th>
+                        <th className="border p-2">Date</th>
+                        <th className="border p-2">Details</th>
+                        <th className="border p-2"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {expensesList.map((expense, index) => (
+                        <tr key={index}>
+                          <td className="border p-2">{expense.Amount}</td>
+                          <td className="border p-2">{expense.date}</td>
+                          <td className="border p-2">{expense.Details}</td>
+                          <td className="border p-2 gap-2 flex justify-end pr-px">
+                            <button
+                              className="text-blue-500 mr-4 -ml-4"
+                              onClick={() => handleEditExpense(expense)}
+                            >
+                              <FontAwesomeIcon icon={faEdit} />
+                            </button>
+                            <button
+                              className="text-red-500"
+                              onClick={async () => {
+                                if (
+                                  window.confirm(
+                                    "Are you sure you want to delete this expense?"
+                                  )
+                                ) {
+                                  setIsDeleting(true);
+                                  try {
+                                    await handleDeleteExpense(expense.$id);
+                                  } catch (error) {
+                                    console.error(
+                                      "Error deleting expense:",
+                                      error
+                                    );
+                                  } finally {
+                                    setIsDeleting(false);
+                                  }
+                                }
+                              }}
+                            >
+                              {isDeleting ? (
+                                <LoadingSpinner />
+                              ) : (
+                                <FontAwesomeIcon icon={faTrash} />
+                              )}
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <Modal isOpen={isModalOpen} onClose={handleCancel}>
+                <div className="p-4 bg-gray-100 rounded-lg">
+                  <h2 className="text-center mb-4 text-xl font-semibold">
+                    {editingExpense ? "Edit" : "Add"} Expense
+                  </h2>
+                  {isAdding || isEditing ? (
+                    <LoadingSpinner />
+                  ) : (
+                    <form onSubmit={handleSubmit}>
+                      <div className="mb-4">
+                        <label
+                          htmlFor="amount"
+                          className="block text-sm font-medium text-gray-700"
+                        >
+                          Amount:
+                        </label>
+                        <input
+                          type="number"
+                          id="amount"
+                          className="block w-full border border-gray-300 rounded p-2"
+                          value={Amount}
+                          onChange={(e) => setAmount(e.target.value)}
+                        />
+                      </div>
+                      <div className="mb-4">
+                        <label
+                          htmlFor="date"
+                          className="block text-sm font-medium text-gray-700"
+                        >
+                          Date:
+                        </label>
+                        <input
+                          type="date"
+                          id="date"
+                          className="block w-full border border-gray-300 rounded p-2"
+                          value={date}
+                          onChange={(e) => setDate(e.target.value)}
+                        />
+                      </div>
+                      <div className="mb-4">
+                        <label
+                          htmlFor="details"
+                          className="block text-sm font-medium text-gray-700"
+                        >
+                          Details:
+                        </label>
+                        <input
+                          type="text"
+                          id="details"
+                          className="block w-full border border-gray-300 rounded p-2"
+                          value={Details}
+                          onChange={(e) => setDetails(e.target.value)}
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          type="submit"
+                          className={`w-full bg-blue-500 text-white font-bold py-2 px-4 rounded ${
+                            isAdding || isEditing
+                              ? "opacity-50 cursor-not-allowed"
+                              : ""
+                          }`}
+                          disabled={isAdding || isEditing}
+                        >
+                          {editingExpense ? "Update" : "Add"}
+                        </button>
+                        <button
+                          type="button"
+                          className="w-full bg-gray-500 text-white font-bold py-2 px-4 rounded"
+                          onClick={handleCancel}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  )}
+                </div>
+              </Modal>
+            </div>
+          )}
+        </div>
+
+        <div className="max-w-md mx-auto mt-8 bg-white bg-opacity-80 p-2 shadow-md">
+          <h4 className="text-xl font-semibold text-center">
+            Total Expenses for {dateFormat(date, "dd mm yyyy")}
+          </h4>
+          <p className="text-center text-2xl font-bold">{totalAmount}</p>
         </div>
       </div>
-
-      <div>
-        {isLoading ? (
-          <LoadingSpinner />
-        ) : (
-          <div className="relative">
-            <div className="max-w-3xl mx-auto mt-5">
-              <div className="bg-white shadow-md rounded p-4">
-                <button
-                  className="absolute top-0 right-15 mt-3 mr-3 bg-blue-500 text-white font-bold py-1 px-2 rounded"
-                  onClick={handleAddExpenseClick}
-                >
-                  Add
-                </button>
-                <h2 className="text-center mb-4 text-2xl font-semibold">
-                  View Expenses
-                </h2>
-                <table className="w-full border-collapse">
-                  <thead>
-                    <tr>
-                      <th className="border p-2">Amount</th>
-                      <th className="border p-2">Date</th>
-                      <th className="border p-2">Details</th>
-                      <th className="border p-2"></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {expensesList.map((expense, index) => (
-                      <tr key={index}>
-                        <td className="border p-2">{expense.Amount}</td>
-                        <td className="border p-2">{expense.date}</td>
-                        <td className="border p-2">{expense.Details}</td>
-                        <td className="border p-2">
-                          <button
-                            className="text-blue-500 mr-2"
-                            onClick={() => handleEditExpense(expense)}
-                          >
-                            <FontAwesomeIcon icon={faEdit} />
-                          </button>
-                          <button
-                            className="text-red-500"
-                            onClick={async () => {
-                              if (
-                                window.confirm(
-                                  "Are you sure you want to delete this expense?"
-                                )
-                              ) {
-                                setIsDeleting(true);
-                                try {
-                                  await handleDeleteExpense(expense.$id);
-                                } catch (error) {
-                                  console.error(
-                                    "Error deleting expense:",
-                                    error
-                                  );
-                                } finally {
-                                  setIsDeleting(false);
-                                }
-                              }
-                            }}
-                          >
-                            {isDeleting ? (
-                              <LoadingSpinner />
-                            ) : (
-                              <FontAwesomeIcon icon={faTrash} />
-                            )}
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            <Modal isOpen={isModalOpen} onClose={handleCancel}>
-              <div className="p-4">
-                <h2 className="text-center mb-4 text-xl font-semibold">
-                  {editingExpense ? "Edit" : "Add"} Expense
-                </h2>
-                {isAdding || isEditing ? (
-                  <LoadingSpinner />
-                ) : (
-                  <form onSubmit={handleSubmit}>
-                    <div className="mb-4">
-                      <label
-                        htmlFor="amount"
-                        className="block text-sm font-medium text-gray-700"
-                      >
-                        Amount:
-                      </label>
-                      <input
-                        type="number"
-                        id="amount"
-                        className="block w-full border border-gray-300 rounded p-2"
-                        value={Amount}
-                        onChange={(e) => setAmount(e.target.value)}
-                      />
-                    </div>
-                    <div className="mb-4">
-                      <label
-                        htmlFor="date"
-                        className="block text-sm font-medium text-gray-700"
-                      >
-                        Date:
-                      </label>
-                      <input
-                        type="date"
-                        id="date"
-                        className="block w-full border border-gray-300 rounded p-2"
-                        value={date}
-                        onChange={(e) => setdate(e.target.value)}
-                      />
-                    </div>
-                    <div className="mb-4">
-                      <label
-                        htmlFor="details"
-                        className="block text-sm font-medium text-gray-700"
-                      >
-                        Details:
-                      </label>
-                      <input
-                        type="text"
-                        id="details"
-                        className="block w-full border border-gray-300 rounded p-2"
-                        value={Details}
-                        onChange={(e) => setDetails(e.target.value)}
-                      />
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        type="submit"
-                        className={`w-full bg-blue-500 text-white font-bold py-2 px-4 rounded ${
-                          isAdding || isEditing
-                            ? "opacity-50 cursor-not-allowed"
-                            : ""
-                        }`}
-                        disabled={isAdding || isEditing}
-                      >
-                        {editingExpense ? "Update" : "Add"}
-                      </button>
-                      <button
-                        type="button"
-                        className="w-full bg-gray-500 text-white font-bold py-2 px-4 rounded"
-                        onClick={handleCancel}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </form>
-                )}
-              </div>
-            </Modal>
-          </div>
-        )}
-      </div>
-
-      <div className="text-center mt-8">
-        <h4 className="text-xl font-semibold">Total Expenses for {date}</h4>
-        <p className="text-2xl font-bold">{totalAmount}</p>
-      </div>
-    </div>
+    </>
   );
 };
 

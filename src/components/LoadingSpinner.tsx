@@ -1,9 +1,7 @@
-import React from "react";
-
 const LoadingSpinner: React.FC = () => {
   return (
-    <div className="flex justify-center items-center mt-16">
-      <div className="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12"></div>
+    <div className="flex justify-center items-center h-full">
+      <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-16 w-16"></div>
     </div>
   );
 };
